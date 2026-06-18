@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const app = express()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 
 app.use(cors())
@@ -24,20 +24,29 @@ const run = async() => {
 
       const db = client.db('recipeHub')
       const reciepeCollection = db.collection('recipes')
+      const userCollection = db.collection('user')
       const subcriptionCollection = db.collection('subscriptions')
 
       app.post('/subscription', async(req,res) => {
-        const {sessionId, priceId, userId} = req.body
+
+        const {session_id: sessionId, priceId, userId, userEmail} = req.body
+
+        // console.log("my id",sessionId,
+        //   priceId,
+        //   userId,
+        //   userEmail)
+
+        const isExist = await subcriptionCollection.findOne({sessionId})
+        if(isExist){
+          return res.json({message: 'Aready Exist'})
+        }
+
         await subcriptionCollection.insertOne({
           sessionId,
           priceId,
           userId,
+          userEmail,
         })
-
-        // const isExist = await subcriptionCollection.findOne({sessionId})
-        // if(isExist){
-        //   return res.json({message: 'Aready Exist'})
-        // }
 
         await userCollection.updateOne(
           {_id: new ObjectId(userId)},
