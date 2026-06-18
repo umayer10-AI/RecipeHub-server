@@ -24,6 +24,7 @@ const run = async() => {
 
       const db = client.db('recipeHub')
       const reciepeCollection = db.collection('recipes')
+      const saveCollection = db.collection('saves')
       const userCollection = db.collection('user')
       const subcriptionCollection = db.collection('subscriptions')
 
@@ -86,7 +87,6 @@ const run = async() => {
 
       app.delete('/api/recipes/delete/:id', async(req,res) => {
         const {id} = req.params
-        console.log(id)
         const filter = {
           _id: new ObjectId(id)
         }
@@ -101,7 +101,7 @@ const run = async() => {
 
       app.get('/api/recipes/single/:id', async(req,res) => {
         const {id} = req.params
-        console.log(id)
+        // console.log(id)
         const result = await reciepeCollection.findOne({_id: new ObjectId(id)})
         res.json(result)
       })
@@ -115,6 +115,27 @@ const run = async() => {
         const result = await reciepeCollection.insertOne(receipeData)
         res.json(result)
       })
+
+      app.get('/api/recipes/save/data/:id', async(req,res) => {
+        const {id} = req.params
+        const result = await saveCollection.find({userId: id}).toArray()
+        res.json(result)
+      })
+
+      app.post('/api/recipes/save', async(req,res) => {
+        const m = req.body
+        const {saveId} = m
+
+        const isExist = await saveCollection.findOne({saveId})
+        if(isExist){
+          return res.json({message: 'Aready Exist'})
+        }
+
+        const result = await saveCollection.insertOne(m)
+        res.json(result)
+      })
+
+      
 
       await client.db("admin").command({ ping: 1 });
       console.log("Pinged your deployment. You successfully connected to MongoDB!");
