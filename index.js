@@ -64,6 +64,48 @@ const run = async() => {
         res.json(result)
       })
 
+      app.patch('/api/recipes/edit/:id', async(req,res) => {
+        const {id} = req.params
+        const m = req.body
+        console.log(id,m)
+        const filter = {
+          _id: new ObjectId(id)
+        }
+        const update = {
+          $set: m
+        }
+        const result = await reciepeCollection.updateOne(filter,update)
+        res.json(result)
+      })
+
+      app.get('/api/recipes', async(req,res) => {
+        const result = await reciepeCollection.find().toArray()
+        res.json(result)
+      })
+
+
+      app.delete('/api/recipes/delete/:id', async(req,res) => {
+        const {id} = req.params
+        console.log(id)
+        const filter = {
+          _id: new ObjectId(id)
+        }
+        const result = await reciepeCollection.deleteOne(filter)
+        res.json(result)
+      })
+
+      app.get('/api/recipes', async(req,res) => {
+        const result = await reciepeCollection.find().toArray()
+        res.json(result)
+      })
+
+      app.get('/api/recipes/single/:id', async(req,res) => {
+        const {id} = req.params
+        console.log(id)
+        const result = await reciepeCollection.findOne({_id: new ObjectId(id)})
+        res.json(result)
+      })
+
       app.post('/api/recipes', async(req,res) => {
         const m = req.body
         const receipeData = {
