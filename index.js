@@ -122,6 +122,13 @@ const run = async() => {
         res.json(result)
       })
 
+      app.delete('/api/recipes/save/delete/:id', async(req,res) => {
+        const {id} = req.params
+        // console.log(id)
+        const result = await saveCollection.deleteOne({_id: new ObjectId(id)})
+        res.json(result)
+      })
+
       app.post('/api/recipes/save', async(req,res) => {
         const m = req.body
         const {saveId} = m
