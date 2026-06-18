@@ -24,6 +24,29 @@ const run = async() => {
 
       const db = client.db('recipeHub')
       const reciepeCollection = db.collection('recipes')
+      const subcriptionCollection = db.collection('subscriptions')
+
+      app.post('/subscription', async(req,res) => {
+        const {sessionId, priceId, userId} = req.body
+        await subcriptionCollection.insertOne({
+          sessionId,
+          priceId,
+          userId,
+        })
+
+        // const isExist = await subcriptionCollection.findOne({sessionId})
+        // if(isExist){
+        //   return res.json({message: 'Aready Exist'})
+        // }
+
+        await userCollection.updateOne(
+          {_id: new ObjectId(userId)},
+          { $set: { plan: 'pro'}}
+        )
+
+        res.json({message: 'Payment Successfull'})
+      })
+
 
       app.get('/api/recipes/:id', async(req,res) => {
         const {id} = req.params
