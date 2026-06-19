@@ -242,14 +242,40 @@ const run = async() => {
       });
 
       app.get('/api/admin/users',async(req,res) => {
-        const result = await userCollection.countDocuments()
+        const result = await userCollection.find().toArray()
         res.json(result)
       })
 
       app.get('/api/admin/recipes',async(req,res) => {
-        const result = await reciepeCollection.countDocuments()
+        const result = await reciepeCollection.find().toArray()
         res.json(result)
       })
+
+      app.get('/api/admin/premium',async(req,res) => {
+        const result = await userCollection.find({plan: 'pro'}).toArray()
+        res.json(result)
+        // console.log(result.length)
+      })
+
+      app.patch('/users/block/:id', async (req, res) => {
+      const {id} = req.params
+      
+      const user = await userCollection.findOne({
+        _id: new ObjectId(id)
+      });
+      // console.log(user)
+
+      const result = await userCollection.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            isBlock: !user.isBlock,
+          },
+        }
+      );
+
+        res.send(result);
+      });
 
       
 
