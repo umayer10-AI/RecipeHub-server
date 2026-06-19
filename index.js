@@ -75,31 +75,29 @@ const run = async() => {
       })
 
       app.patch('/api/recipes/like/count/:id', async (req, res) => {
-  const { id } = req.params;
+        const { id } = req.params;
 
-  // প্রথমে document নাও
-  const recipe = await reciepeCollection.findOne({
-    _id: new ObjectId(id)
-  });
+        const recipe = await reciepeCollection.findOne({
+          _id: new ObjectId(id)
+        });
 
-  if (!recipe) {
-    return res.status(404).json({ message: "Recipe not found" });
-  }
+        if (!recipe) {
+          return res.status(404).json({ message: "Recipe not found" });
+        }
 
-  // string → number convert
-  const currentLike = Number(recipe.like || 0);
+        const currentLike = Number(recipe.like || 0);
 
-  const result = await reciepeCollection.updateOne(
-    { _id: new ObjectId(id) },
-    {
-      $set: {
-        like: currentLike + 1
-      }
-    }
-  );
+        const result = await reciepeCollection.updateOne(
+          { _id: new ObjectId(id) },
+          {
+            $set: {
+              like: currentLike + 1
+            }
+          }
+        );
 
-  res.json(result);
-});
+        res.json(result);
+      });
 
       app.patch('/api/recipes/edit/:id', async(req,res) => {
         const {id} = req.params
@@ -242,6 +240,16 @@ const run = async() => {
 
         res.json({ isReported: !!isReported });
       });
+
+      app.get('/api/admin/users',async(req,res) => {
+        const result = await userCollection.countDocuments()
+        res.json(result)
+      })
+
+      app.get('/api/admin/recipes',async(req,res) => {
+        const result = await reciepeCollection.countDocuments()
+        res.json(result)
+      })
 
       
 
