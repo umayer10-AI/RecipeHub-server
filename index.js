@@ -66,6 +66,41 @@ const run = async() => {
         res.json(result)
       })
 
+      app.get('/api/recipes/like/:id', async(req,res) => {
+        const {id} = req.params
+        // console.log(id)
+        const result = await reciepeCollection.find({userId: id}).toArray()
+        const count = result.reduce((a,b) => a + Number(b.like), 0)
+        res.json(count)
+      })
+
+      app.patch('/api/recipes/like/count/:id', async (req, res) => {
+  const { id } = req.params;
+
+  // প্রথমে document নাও
+  const recipe = await reciepeCollection.findOne({
+    _id: new ObjectId(id)
+  });
+
+  if (!recipe) {
+    return res.status(404).json({ message: "Recipe not found" });
+  }
+
+  // string → number convert
+  const currentLike = Number(recipe.like || 0);
+
+  const result = await reciepeCollection.updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: {
+        like: currentLike + 1
+      }
+    }
+  );
+
+  res.json(result);
+});
+
       app.patch('/api/recipes/edit/:id', async(req,res) => {
         const {id} = req.params
         const m = req.body
@@ -148,6 +183,8 @@ const run = async() => {
       //   const result = await saveCollection.insertOne(m)
       //   res.json(result)
       // })
+
+
 
       app.post('/api/recipes/save', async(req,res) => {
         const m = req.body
