@@ -27,6 +27,7 @@ const run = async() => {
       const saveCollection = db.collection('saves')
       const userCollection = db.collection('user')
       const subcriptionCollection = db.collection('subscriptions')
+      const reportCollection = db.collection('reports')
 
       app.post('/subscription', async(req,res) => {
 
@@ -116,9 +117,15 @@ const run = async() => {
         res.json(result)
       })
 
+      // app.get('/api/recipes/save/data/:id', async(req,res) => {
+      //   const {id} = req.params
+      //   const result = await saveCollection.find({userId: id}).toArray()
+      //   res.json(result)
+      // })
+
       app.get('/api/recipes/save/data/:id', async(req,res) => {
         const {id} = req.params
-        const result = await saveCollection.find({userId: id}).toArray()
+        const result = await saveCollection.find({savedBy: id}).toArray()
         res.json(result)
       })
 
@@ -129,18 +136,75 @@ const run = async() => {
         res.json(result)
       })
 
+      // app.post('/api/recipes/save', async(req,res) => {
+      //   const m = req.body
+      //   const {saveId} = m
+
+      //   const isExist = await saveCollection.findOne({saveId})
+      //   if(isExist){
+      //     return res.json({message: 'Aready Exist'})
+      //   }
+
+      //   const result = await saveCollection.insertOne(m)
+      //   res.json(result)
+      // })
+
       app.post('/api/recipes/save', async(req,res) => {
         const m = req.body
-        const {saveId} = m
 
-        const isExist = await saveCollection.findOne({saveId})
+        const isExist = await saveCollection.findOne({
+          saveId: m.saveId,
+          savedBy: m.savedBy
+        })
+
         if(isExist){
-          return res.json({message: 'Aready Exist'})
+          return res.json({message: 'Already Exist'})
         }
 
         const result = await saveCollection.insertOne(m)
         res.json(result)
       })
+
+      // app.post('/api/recipes/report', async(req,res) => {
+      //   const m = req.body
+      //   const reportData = {
+      //     ...m,
+      //     createdAt: new Date()
+      //   }
+      //   const result = await reportCollection.insertOne(reportData)
+      //   res.json(result)
+      // })
+
+      app.post("/api/recipes/report", async (req, res) => {
+        const reportData = req.body;
+
+        const isExist = await reportCollection.findOne({
+          recipeId: reportData.recipeId,
+          reportedBy: reportData.reportedBy,
+        });
+
+        if (isExist) {
+          return res.json({ alreadyReported: true });
+        }
+
+        const result = await reportCollection.insertOne({
+          ...reportData,
+          createdAt: new Date(),
+        });
+
+        res.json(result);
+      });
+
+      app.get("/api/recipes/report/status/:recipeId/:userId", async (req, res) => {
+        const { recipeId, userId } = req.params;
+
+        const isReported = await reportCollection.findOne({
+          recipeId,
+          reportedBy: userId,
+        });
+
+        res.json({ isReported: !!isReported });
+      });
 
       
 
