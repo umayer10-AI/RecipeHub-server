@@ -253,21 +253,21 @@ const run = async() => {
       // })
 
       app.get('/api/admin/recipes', async (req, res) => {
-  const recipes = await reciepeCollection.find().toArray();
+        const recipes = await reciepeCollection.find().toArray();
 
-  const featuredRecipes = await featureCollection.find().toArray();
+        const featuredRecipes = await featureCollection.find().toArray();
 
-  const featuredIds = featuredRecipes.map(
-    item => item.recipeId
-  );
+        const featuredIds = featuredRecipes.map(
+          item => item.recipeId
+        );
 
-  const updatedRecipes = recipes.map(recipe => ({
-    ...recipe,
-    featured: featuredIds.includes(recipe._id.toString()),
-  }));
+        const updatedRecipes = recipes.map(recipe => ({
+          ...recipe,
+          featured: featuredIds.includes(recipe._id.toString()),
+        }));
 
-  res.json(updatedRecipes);
-});
+        res.json(updatedRecipes);
+      });
 
       app.get('/api/admin/premium',async(req,res) => {
         const result = await userCollection.find({plan: 'pro'}).toArray()
@@ -308,33 +308,38 @@ const run = async() => {
       // })
 
       app.post('/api/admin/recipe/feature', async (req, res) => {
-  const recipe = req.body;
+        const recipe = req.body;
 
-  const existing = await featureCollection.findOne({
-    recipeId: recipe._id,
-  });
+        const existing = await featureCollection.findOne({
+          recipeId: recipe._id,
+        });
 
-  if (existing) {
-    await featureCollection.deleteOne({
-      recipeId: recipe._id,
-    });
+        if (existing) {
+          await featureCollection.deleteOne({
+            recipeId: recipe._id,
+          });
 
-    return res.json({
-      action: "removed",
-    });
-  }
+          return res.json({
+            action: "removed",
+          });
+        }
 
-  const result = await featureCollection.insertOne({
-    ...recipe,
-    recipeId: recipe._id,
-    featuredAt: new Date(),
-  });
+        const result = await featureCollection.insertOne({
+          ...recipe,
+          recipeId: recipe._id,
+          featuredAt: new Date(),
+        });
 
-  res.json({
-    action: "added",
-    insertedId: result.insertedId,
-  });
-});
+        res.json({
+          action: "added",
+          insertedId: result.insertedId,
+        });
+      });
+
+      app.get('/api/admin/recipe/feature', async(req,res) => {
+        const result = await featureCollection.find().toArray()
+        res.json(result)
+      })
 
       app.get('/api/recipes/report/list', async(req,res) => {
         const result = await reportCollection.find().toArray()
@@ -352,6 +357,7 @@ const run = async() => {
         const result = await reciepeCollection.deleteOne({_id: new ObjectId(id)})
         res.json(result)
       })
+
       
 
       await client.db("admin").command({ ping: 1 });
