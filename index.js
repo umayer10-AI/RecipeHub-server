@@ -84,8 +84,12 @@ const run = async() => {
 
       app.get('/user/payments/:email', async(req,res) => {
         const {email} = req.params
-        // console.log(email)
         const result = await paymentCollection.find({userEmail: email}).toArray() 
+        res.json(result)
+      })
+
+      app.get('/user/payments/admin/data', async(req,res) => {
+        const result = await paymentCollection.find().toArray() 
         res.json(result)
       })
 
