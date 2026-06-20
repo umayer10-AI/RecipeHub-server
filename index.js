@@ -247,10 +247,27 @@ const run = async() => {
         res.json(result)
       })
 
-      app.get('/api/admin/recipes',async(req,res) => {
-        const result = await reciepeCollection.find().toArray()
-        res.json(result)
-      })
+      // app.get('/api/admin/recipes',async(req,res) => {
+      //   const result = await reciepeCollection.find().toArray()
+      //   res.json(result)
+      // })
+
+      app.get('/api/admin/recipes', async (req, res) => {
+  const recipes = await reciepeCollection.find().toArray();
+
+  const featuredRecipes = await featureCollection.find().toArray();
+
+  const featuredIds = featuredRecipes.map(
+    item => item.recipeId
+  );
+
+  const updatedRecipes = recipes.map(recipe => ({
+    ...recipe,
+    featured: featuredIds.includes(recipe._id.toString()),
+  }));
+
+  res.json(updatedRecipes);
+});
 
       app.get('/api/admin/premium',async(req,res) => {
         const result = await userCollection.find({plan: 'pro'}).toArray()
@@ -284,9 +301,55 @@ const run = async() => {
         res.json(result)
       })
 
-      app.post('/api/admin/recipe/feature', async(req,res) => {
-        const m = req.body
-        const result = await featureCollection.insertOne(m)
+      // app.post('/api/admin/recipe/feature', async(req,res) => {
+      //   const m = req.body
+      //   const result = await featureCollection.insertOne(m)
+      //   res.json(result)
+      // })
+
+      app.post('/api/admin/recipe/feature', async (req, res) => {
+  const recipe = req.body;
+
+  const existing = await featureCollection.findOne({
+    recipeId: recipe._id,
+  });
+
+  if (existing) {
+    await featureCollection.deleteOne({
+      recipeId: recipe._id,
+    });
+
+    return res.json({
+      action: "removed",
+    });
+  }
+
+  const result = await featureCollection.insertOne({
+    ...recipe,
+    recipeId: recipe._id,
+    featuredAt: new Date(),
+  });
+
+  res.json({
+    action: "added",
+    insertedId: result.insertedId,
+  });
+});
+
+      app.get('/api/recipes/report/list', async(req,res) => {
+        const result = await reportCollection.find().toArray()
+        res.json(result)
+      })
+
+      app.delete('/api/recipes/report/list/delete/:id', async(req,res) => {
+        const {id} = req.params
+        const result = await reportCollection.deleteOne({_id: new ObjectId(id)})
+        res.json(result)
+      })
+
+      app.delete('/api/recipes/report/recipe/list/delete/:id', async(req,res) => {
+        const {id} = req.params
+        const result = await reciepeCollection.deleteOne({_id: new ObjectId(id)})
         res.json(result)
       })
       
