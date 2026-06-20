@@ -27,6 +27,7 @@ const run = async() => {
       const saveCollection = db.collection('saves')
       const userCollection = db.collection('user')
       const subcriptionCollection = db.collection('subscriptions')
+      const paymentCollection = db.collection('payments')
       const reportCollection = db.collection('reports')
       const featureCollection = db.collection('features')
 
@@ -59,10 +60,31 @@ const run = async() => {
         res.json({message: 'Payment Successfull'})
       })
 
+      app.post('/user/payments', async(req,res) => {
+
+        const {session_id: sessionId, price, userId, userEmail,recipeName, recipeId} = req.body
+
+        const isExist = await paymentCollection.findOne({sessionId})
+        if(isExist){
+          return res.json({message: 'Aready Exist'})
+        }
+
+        await paymentCollection.insertOne({
+          sessionId,
+          price,
+          userId,
+          userEmail,
+          recipeName,
+          recipeId,
+          paidAt: new Date(),
+        })
+
+        res.json({message: 'Payment Successfull'})
+      })
+
 
       app.get('/api/recipes/:id', async(req,res) => {
         const {id} = req.params
-        // console.log(id)
         const result = await reciepeCollection.find({userId: id}).toArray()
         res.json(result)
       })
@@ -128,6 +150,7 @@ const run = async() => {
         const result = await reciepeCollection.deleteOne(filter)
         res.json(result)
       })
+
 
       app.get('/api/recipes', async (req, res) => {
         const {search='', category='', page=1, limit = 8} = req.query;
