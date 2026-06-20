@@ -82,6 +82,13 @@ const run = async() => {
         res.json({message: 'Payment Successfull'})
       })
 
+      app.get('/user/payments/:email', async(req,res) => {
+        const {email} = req.params
+        // console.log(email)
+        const result = await paymentCollection.find({userEmail: email}).toArray() 
+        res.json(result)
+      })
+
 
       app.get('/api/recipes/:id', async(req,res) => {
         const {id} = req.params
