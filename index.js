@@ -54,6 +54,15 @@ const customerVerify = async (req, res, next) => {
   next()
 }
 
+const adminVerify = async (req, res, next) => {
+  const user = req.user
+  console.log(user)
+  if(user.role !== 'admin'){
+    return res.status(403).json({message: 'Forbidden'})
+  }
+  next()
+}
+
 const run = async() => {
     try {
       await client.connect();
@@ -343,15 +352,11 @@ const run = async() => {
         res.json({ isReported: !!isReported });
       });
 
-      app.get('/api/admin/users',async(req,res) => {
+      app.get('/api/admin/users',verifyJWT, adminVerify, async(req,res) => {
         const result = await userCollection.find().toArray()
         res.json(result)
       })
 
-      // app.get('/api/admin/recipes',async(req,res) => {
-      //   const result = await reciepeCollection.find().toArray()
-      //   res.json(result)
-      // })
 
       app.get('/api/admin/recipes', async (req, res) => {
         const recipes = await reciepeCollection.find().toArray();
@@ -376,13 +381,12 @@ const run = async() => {
         // console.log(result.length)
       })
 
-      app.patch('/users/block/:id', async (req, res) => {
+      app.patch('/users/block/:id', verifyJWT,adminVerify, async (req, res) => {
       const {id} = req.params
       
       const user = await userCollection.findOne({
         _id: new ObjectId(id)
       });
-      // console.log(user)
 
       const result = await userCollection.updateOne(
         { _id: new ObjectId(id) },
@@ -396,7 +400,7 @@ const run = async() => {
         res.send(result);
       });
 
-      app.delete('/api/admin/recipe/delete/:id', async(req,res) => {
+      app.delete('/api/admin/recipe/delete/:id',verifyJWT, adminVerify, async(req,res) => {
         const {id} = req.params
         const result = await reciepeCollection.deleteOne({_id: new ObjectId(id)})
         res.json(result)
@@ -408,7 +412,7 @@ const run = async() => {
       //   res.json(result)
       // })
 
-      app.post('/api/admin/recipe/feature', async (req, res) => {
+      app.post('/api/admin/recipe/feature',verifyJWT, adminVerify, async (req, res) => {
         const recipe = req.body;
 
         const existing = await featureCollection.findOne({
