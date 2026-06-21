@@ -37,7 +37,6 @@ const verifyJWT = async (req, res, next) => {
   try{
     const { payload } = await jwtVerify(token, JWKS)
     req.user = payload
-    // console.log(payload)
     next()
   }
   catch(error){
@@ -65,7 +64,6 @@ const adminVerify = async (req, res, next) => {
 
 const run = async() => {
     try {
-      // await client.connect();
 
       const db = client.db('recipeHub')
       const reciepeCollection = db.collection('recipes')
@@ -79,11 +77,6 @@ const run = async() => {
       app.post('/subscription', async(req,res) => {
 
         const {session_id: sessionId, priceId, userId, userEmail} = req.body
-
-        // console.log("my id",sessionId,
-        //   priceId,
-        //   userId,
-        //   userEmail)
 
         const isExist = await subcriptionCollection.findOne({sessionId})
         if(isExist){
@@ -147,7 +140,6 @@ const run = async() => {
 
       app.get('/api/recipes/like/:id', async(req,res) => {
         const {id} = req.params
-        // console.log(id)
         const result = await reciepeCollection.find({userId: id}).toArray()
         const count = result.reduce((a,b) => a + Number(b.like), 0)
         res.json(count)
@@ -192,17 +184,13 @@ const run = async() => {
         res.json(result)
       })
 
-      // app.get('/api/recipes', async(req,res) => {
-      //   const result = await reciepeCollection.find().toArray()
-      //   res.json(result)
-      // })
-
 
       app.delete('/api/recipes/delete/:id',verifyJWT, customerVerify, async(req,res) => {
         const {id} = req.params
         const filter = {
           _id: new ObjectId(id)
         }
+        const saveDelete = await saveCollection.deleteMany({saveId: id})
         const result = await reciepeCollection.deleteOne(filter)
         res.json(result)
       })
@@ -252,7 +240,6 @@ const run = async() => {
 
       app.get('/api/recipes/single/:id', async(req,res) => {
         const {id} = req.params
-        // console.log(id)
         const result = await reciepeCollection.findOne({_id: new ObjectId(id)})
         res.json(result)
       })
@@ -275,24 +262,9 @@ const run = async() => {
 
       app.delete('/api/recipes/save/delete/:id',verifyJWT, customerVerify, async(req,res) => {
         const {id} = req.params
-        // console.log(id)
         const result = await saveCollection.deleteOne({_id: new ObjectId(id)})
         res.json(result)
       })
-
-      // app.post('/api/recipes/save', async(req,res) => {
-      //   const m = req.body
-      //   const {saveId} = m
-
-      //   const isExist = await saveCollection.findOne({saveId})
-      //   if(isExist){
-      //     return res.json({message: 'Aready Exist'})
-      //   }
-
-      //   const result = await saveCollection.insertOne(m)
-      //   res.json(result)
-      // })
-
 
 
       app.post('/api/recipes/save', async(req,res) => {
@@ -310,16 +282,6 @@ const run = async() => {
         const result = await saveCollection.insertOne(m)
         res.json(result)
       })
-
-      // app.post('/api/recipes/report', async(req,res) => {
-      //   const m = req.body
-      //   const reportData = {
-      //     ...m,
-      //     createdAt: new Date()
-      //   }
-      //   const result = await reportCollection.insertOne(reportData)
-      //   res.json(result)
-      // })
 
       app.post("/api/recipes/report", async (req, res) => {
         const reportData = req.body;
@@ -462,8 +424,6 @@ const run = async() => {
       })
 
       
-
-      // await client.db("admin").command({ ping: 1 });
       console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } 
     finally {
