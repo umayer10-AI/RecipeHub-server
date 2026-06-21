@@ -169,7 +169,7 @@ const run = async() => {
         res.json(result);
       });
 
-      app.patch('/api/recipes/edit/:id', async(req,res) => {
+      app.patch('/api/recipes/edit/:id',verifyJWT, customerVerify, async(req,res) => {
         const {id} = req.params
         const m = req.body
         console.log(id,m)
@@ -270,7 +270,7 @@ const run = async() => {
         res.json(result)
       })
 
-      app.delete('/api/recipes/save/delete/:id', async(req,res) => {
+      app.delete('/api/recipes/save/delete/:id',verifyJWT, customerVerify, async(req,res) => {
         const {id} = req.params
         // console.log(id)
         const result = await saveCollection.deleteOne({_id: new ObjectId(id)})
