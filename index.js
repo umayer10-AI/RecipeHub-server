@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 const port = process.env.PORT || 5000
 
 app.use(cors())
@@ -17,6 +18,41 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.NEXT_PUBLIC_CLIENT}/api/auth/jwks`)
+)
+
+
+const verifyJWT = async (req, res, next) => {
+  const header = req.headers.authorization;
+  if(!header){
+    return res.status(401).json({message: 'Unauthorized'})
+  }
+  const token = header.split(' ')[1]
+  if(!token){
+    return res.status(401).json({message: 'Unauthorized'})
+  }
+
+  try{
+    const { payload } = await jwtVerify(token, JWKS)
+    req.user = payload
+    // console.log(payload)
+    next()
+  }
+  catch(error){
+    return res.status(403).json({message: 'Forbidden'})
+  }
+}
+
+const customerVerify = async (req, res, next) => {
+  const user = req.user
+  console.log(user)
+  if(user.role !== 'customer'){
+    return res.status(403).json({message: 'Forbidden'})
+  }
+  next()
+}
 
 const run = async() => {
     try {
@@ -228,7 +264,7 @@ const run = async() => {
       //   res.json(result)
       // })
 
-      app.get('/api/recipes/save/data/:id', async(req,res) => {
+      app.get('/api/recipes/save/data/:id',verifyJWT, customerVerify, async(req,res) => {
         const {id} = req.params
         const result = await saveCollection.find({savedBy: id}).toArray()
         res.json(result)
