@@ -456,6 +456,11 @@ const run = async() => {
         res.json(result)
       })
 
+      app.get('/api/recipe/like/top', async(req,res) => {
+        const result = await reciepeCollection.find().sort({like: -1}).limit(5).toArray()
+        res.json(result)
+      })
+
       
 
       // await client.db("admin").command({ ping: 1 });
