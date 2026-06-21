@@ -189,7 +189,7 @@ const run = async() => {
       // })
 
 
-      app.delete('/api/recipes/delete/:id', async(req,res) => {
+      app.delete('/api/recipes/delete/:id',verifyJWT, customerVerify, async(req,res) => {
         const {id} = req.params
         const filter = {
           _id: new ObjectId(id)
@@ -248,7 +248,7 @@ const run = async() => {
         res.json(result)
       })
 
-      app.post('/api/recipes', async(req,res) => {
+      app.post('/api/recipes',verifyJWT, customerVerify, async(req,res) => {
         const m = req.body
         const receipeData = {
           ...m,
@@ -257,12 +257,6 @@ const run = async() => {
         const result = await reciepeCollection.insertOne(receipeData)
         res.json(result)
       })
-
-      // app.get('/api/recipes/save/data/:id', async(req,res) => {
-      //   const {id} = req.params
-      //   const result = await saveCollection.find({userId: id}).toArray()
-      //   res.json(result)
-      // })
 
       app.get('/api/recipes/save/data/:id',verifyJWT, customerVerify, async(req,res) => {
         const {id} = req.params
