@@ -320,7 +320,6 @@ const run = async() => {
         res.json(result)
       })
 
-
       app.get('/api/admin/recipes', verifyJWT, adminVerify, async (req, res) => {
         const recipes = await reciepeCollection.find().toArray();
 
