@@ -364,6 +364,7 @@ const run = async() => {
       app.delete('/api/admin/recipe/delete/:id',verifyJWT, adminVerify, async(req,res) => {
         const {id} = req.params
         const result = await reciepeCollection.deleteOne({_id: new ObjectId(id)})
+        await featureCollection.deleteOne({recipeId: id})
         res.json(result)
       })
 
