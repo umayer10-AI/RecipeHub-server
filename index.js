@@ -255,7 +255,7 @@ const run = async() => {
         res.json(result)
       })
 
-      app.get('/api/recipes/save/data/:id',verifyJWT, customerVerify, async(req,res) => {
+      app.get('/api/recipes/save/data/:id',verifyJWT, async(req,res) => {
         const {id} = req.params
         const result = await saveCollection.find({savedBy: id}).toArray()
         res.json(result)
